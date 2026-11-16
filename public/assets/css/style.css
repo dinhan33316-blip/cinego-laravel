@@ -1,0 +1,374 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  --cine-bg: #0B0B0F;
+  --cine-card: #18181F;
+  --cine-card-hover: #22222B;
+  --cine-surface: #121217;
+  --cine-red: #E50914;
+  --cine-red-hover: #C10712;
+  --cine-red-glow: rgba(229, 9, 20, 0.4);
+  --cine-gold: #F59E0B;
+  --cine-text: #FFFFFF;
+  --cine-text-muted: #A1A1AA;
+  --cine-border: rgba(255, 255, 255, 0.08);
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--cine-bg);
+  color: var(--cine-text);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B0B0F;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #272732;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cine-red);
+}
+
+.cinema-glow {
+  box-shadow: 0 0 40px -10px var(--cine-red-glow);
+}
+
+.cinema-glow-lg {
+  box-shadow: 0 0 80px -15px var(--cine-red-glow);
+}
+
+.gold-glow {
+  box-shadow: 0 0 25px -5px rgba(245, 158, 11, 0.3);
+}
+
+.spotlight-radial {
+  background: radial-gradient(circle at 50% 0%, rgba(229, 9, 20, 0.18) 0%, rgba(11, 11, 15, 0) 70%);
+}
+
+.spotlight-bottom {
+  background: radial-gradient(circle at 50% 100%, rgba(229, 9, 20, 0.15) 0%, rgba(11, 11, 15, 0) 70%);
+}
+
+.hero-overlay-gradient {
+  background: linear-gradient(
+    180deg,
+    rgba(11, 11, 15, 0.4) 0%,
+    rgba(11, 11, 15, 0.7) 40%,
+    rgba(11, 11, 15, 0.95) 85%,
+    #0B0B0F 100%
+  );
+}
+
+.hero-side-gradient {
+  background: linear-gradient(
+    90deg,
+    #0B0B0F 0%,
+    rgba(11, 11, 15, 0.85) 45%,
+    rgba(11, 11, 15, 0.2) 80%,
+    transparent 100%
+  );
+}
+
+.glass-panel {
+  background: rgba(24, 24, 31, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-nav {
+  background: rgba(11, 11, 15, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.curved-screen-container {
+  perspective: 400px;
+}
+
+.curved-screen {
+  height: 12px;
+  background: linear-gradient(90deg, rgba(229,9,20,0.2) 0%, #FFFFFF 50%, rgba(229,9,20,0.2) 100%);
+  border-radius: 50% / 100% 100% 0 0;
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.35), 0 0 20px var(--cine-red);
+  transform: rotateX(-15deg);
+}
+
+.seat-btn {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.seat-btn:hover:not(.occupied):not(.selected) {
+  transform: translateY(-2px);
+  filter: brightness(1.25);
+}
+
+.seat-btn.selected {
+  transform: scale(1.1);
+  box-shadow: 0 0 12px rgba(229, 9, 20, 0.8);
+}
+
+.movie-card {
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease;
+}
+
+.movie-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.8), 0 0 25px -5px rgba(229, 9, 20, 0.25);
+}
+
+.movie-card:hover .movie-poster-img {
+  transform: scale(1.06);
+}
+
+.movie-poster-wrapper {
+  overflow: hidden;
+  position: relative;
+}
+
+.movie-poster-img {
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.ticket-edge-left,
+.ticket-edge-right {
+  position: absolute;
+  top: 50%;
+  width: 24px;
+  height: 24px;
+  background-color: var(--cine-bg);
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+.ticket-edge-left { left: -12px; }
+.ticket-edge-right { right: -12px; }
+
+@keyframes redPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.08);
+  }
+}
+
+.badge-pulse {
+  animation: redPulse 2s infinite ease-in-out;
+}
+
+#toast-container {
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.toast-item {
+  pointer-events: auto;
+  animation: slideInUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.modal-backdrop {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+#ticketLookupModal, #ticket-lookup-modal {
+  display: none;
+  opacity: 0;
+  visibility: hidden;
+  z-index: 9999 !important;
+}
+
+#ticketLookupModal.active, #ticket-lookup-modal.active {
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 9999 !important;
+}
+
+.modal-content {
+  transform: scale(0.96) translateY(10px);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  opacity: 0;
+}
+
+.modal-backdrop.active .modal-content {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+#cinego-chat-toggle-btn {
+  background-color: var(--cine-red);
+  box-shadow: 0 10px 25px rgba(229, 9, 20, 0.45), 0 0 20px rgba(229, 9, 20, 0.3);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#cinego-chat-toggle-btn:hover {
+  background-color: var(--cine-red-hover);
+  transform: scale(1.08);
+  box-shadow: 0 15px 35px rgba(229, 9, 20, 0.65), 0 0 30px rgba(229, 9, 20, 0.45);
+}
+
+#cinego-chat-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+#cinego-chatbox {
+  background: rgba(11, 11, 15, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(229, 9, 20, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transform-origin: bottom right;
+  transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s ease;
+}
+
+#cinego-chatbox.chatbox-open {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1) translateY(0);
+}
+
+#cinego-chatbox.chatbox-closed {
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.9) translateY(20px);
+  pointer-events: none;
+}
+
+.chat-msg {
+  animation: chatMsgFadeIn 0.25s ease-out forwards;
+}
+
+@keyframes chatMsgFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.typing-dot {
+  animation: typingBounce 1.4s infinite ease-in-out both;
+}
+
+.typing-dot:nth-child(1) { animation-delay: -0.32s; }
+.typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes typingBounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+.chat-quick-chip {
+  background: rgba(24, 24, 31, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.2s ease;
+}
+
+.chat-quick-chip:hover {
+  background: rgba(229, 9, 20, 0.15);
+  border-color: rgba(229, 9, 20, 0.5);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+.chat-book-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #E50914 0%, #B80710 100%);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 6px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(229, 9, 20, 0.35);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 6px;
+  margin-bottom: 4px;
+}
+
+.chat-book-btn:hover {
+  background: linear-gradient(135deg, #FF1A27 0%, #D80813 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(229, 9, 20, 0.55);
+}
+
+/* Video Trailer Nền Tràn Viền Toàn Màn Hình */
+.hero-bg-iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100vw;
+  height: 56.25vw;
+  min-height: 100%;
+  min-width: 177.77vh;
+  transform: translate(-50%, -50%) scale(1.32);
+  pointer-events: none;
+  border: 0;
+}
+
+.hero-curtain-hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}

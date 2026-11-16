@@ -1,0 +1,610 @@
+const CINEGO_HERO_DATA = [
+  {
+    id: "m-hero-1",
+    title: "Deadpool & Wolverine",
+    vietnameseTitle: "Deadpool & Wolverine",
+    tagline: "Kỷ Nguyên Đột Phá Vũ Trụ Điện Ảnh Marvel",
+    genre: "Hành động, Hài hước, Viễn tưởng",
+    duration: "128 phút",
+    rating: 9.3,
+    reviewsCount: "14.2K",
+    ageRating: "T18",
+    format: ["IMAX 3D", "2D Phụ đề", "4DX"],
+    backdrop: "https://img.youtube.com/vi/73_1biulkYk/maxresdefault.jpg",
+    poster: "https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg",
+    trailerUrl: "https://www.youtube.com/embed/73_1biulkYk",
+    description: "Một nhiệm vụ bất đắc dĩ kéo Wolverine và gã lính đánh thuê lắm mồm Deadpool vào cuộc chiến sinh tồn giữa các dòng thời gian để bảo vệ vũ trụ.",
+    director: "Shawn Levy",
+    cast: "Ryan Reynolds, Hugh Jackman, Emma Corrin"
+  },
+  {
+    id: "m-hero-2",
+    title: "Inside Out 2",
+    vietnameseTitle: "Những Mảnh Ghép Cảm Xúc 2",
+    tagline: "Chào Đón Những Cảm Xúc Mới Đầy Bất Ngờ",
+    genre: "Hoạt hình, Hài hước, Phiêu lưu",
+    duration: "96 phút",
+    rating: 9.5,
+    reviewsCount: "22.8K",
+    ageRating: "P",
+    format: ["2D Lồng tiếng", "2D Phụ đề", "3D"],
+    backdrop: "https://img.youtube.com/vi/LEjhY15eCx0/maxresdefault.jpg",
+    poster: "https://image.tmdb.org/t/p/w500/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg",
+    trailerUrl: "https://www.youtube.com/embed/LEjhY15eCx0",
+    description: "Bước vào tuổi dậy thì, tâm trí Riley đón nhận những vị khách cảm xúc hoàn toàn mới: Lo Âu, Ghen Tị, Xấu Hổ và Chán Nản, tạo nên cuộc xáo trộn dở khóc dở cười.",
+    director: "Kelsey Mann",
+    cast: "Amy Poehler, Maya Hawke, Phyllis Smith"
+  },
+  {
+    id: "m-hero-3",
+    title: "Godzilla x Kong: The New Empire",
+    vietnameseTitle: "Godzilla x Kong: Đế Chế Mới",
+    tagline: "Đại Chiến Quái Thú Tiền Sử Bảo Vệ Nhân Loại",
+    genre: "Hành động, Khoa học viễn tưởng",
+    duration: "115 phút",
+    rating: 8.9,
+    reviewsCount: "18.5K",
+    ageRating: "T13",
+    format: ["IMAX 3D Laser", "2D Phụ đề", "ScreenX"],
+    backdrop: "https://img.youtube.com/vi/qqrpMRDuPfc/maxresdefault.jpg",
+    poster: "https://image.tmdb.org/t/p/w500/tMefBSflR6PGQLv7WvFPpKLZkyk.jpg",
+    trailerUrl: "https://www.youtube.com/embed/qqrpMRDuPfc",
+    description: "Hai biểu tượng sức mạnh vĩ đại nhất của Trái Đất cùng đứng chung chiến tuyến để đối đầu với mối hiểm họa kinh hoàng từ sâu trong lòng đất Trái Đất Rỗng.",
+    director: "Adam Wingard",
+    cast: "Rebecca Hall, Brian Tyree Henry, Dan Stevens"
+  },
+  {
+    id: "m-hero-4",
+    title: "Dune: Part Two",
+    vietnameseTitle: "Dune: Phần Hai",
+    tagline: "Hành Trình Trả Thù Và Định Mệnh Cứu Rỗi Vũ Trụ",
+    genre: "Khoa học viễn tưởng, Phiêu lưu, Hành động",
+    duration: "166 phút",
+    rating: 9.4,
+    reviewsCount: "28.5K",
+    ageRating: "T16",
+    format: ["IMAX 70mm", "2D Phụ đề", "ScreenX"],
+    backdrop: "https://img.youtube.com/vi/Way9Dexny3w/maxresdefault.jpg",
+    poster: "https://image.tmdb.org/t/p/w500/8b8R8l88Qje9dn9OE8PY05Nxl1X.jpg",
+    trailerUrl: "https://www.youtube.com/embed/Way9Dexny3w",
+    description: "Paul Atreides hợp lực cùng Chani và người Fremen trên con đường báo thù những kẻ đã hủy diệt gia tộc mình, đối mặt với sự lựa chọn giữa tình yêu và số phận vũ trụ.",
+    director: "Denis Villeneuve",
+    cast: "Timothée Chalamet, Zendaya, Rebecca Ferguson, Austin Butler"
+  },
+  {
+    id: "m-hero-5",
+    title: "Bạch Xà: Duyên Khởi",
+    vietnameseTitle: "White Snake (Hoạt Hình 3D Tiên Hiệp)",
+    tagline: "SIÊU PHẨM HOẠT HÌNH 3D TIÊN HIỆP MÃN NHÃN",
+    genre: "Hoạt hình, Tiên hiệp, Hành động",
+    duration: "99 phút",
+    rating: 9.1,
+    reviewsCount: "16.8K",
+    ageRating: "T13",
+    format: ["IMAX Laser", "3D", "2D"],
+    backdrop: "https://img.youtube.com/vi/JeTy_t4WAfo/maxresdefault.jpg",
+    poster: "https://image.tmdb.org/t/p/w500/30SLnoKmYNyRPkKCYowsrGLRnJA.jpg",
+    trailerUrl: "https://www.youtube.com/embed/JeTy_t4WAfo",
+    description: "Tiền duyên ngàn năm đầy bi tráng và phép thuật huyền ảo giữa Bạch Tố Trinh và chàng trai bắt rắn A Tuyên.",
+    director: "Amp Wong, Ji Zhao",
+    cast: "Trương Triết Hãn, Dương Thiên Tường, Đường Tiểu Hỉ"
+  },
+  {
+    id: "m-hero-6",
+    title: "Oppenheimer",
+    vietnameseTitle: "Oppenheimer",
+    tagline: "KIỆT TÁC ĐIỆN ẢNH ĐOẠT 7 GIẢI OSCAR",
+    genre: "Tâm lý, Lịch sử, Kịch tính",
+    duration: "180 phút",
+    rating: 9.6,
+    reviewsCount: "35.1K",
+    ageRating: "T18",
+    format: ["IMAX", "2D Phụ đề"],
+    backdrop: "https://img.youtube.com/vi/uYPbbksJxIg/maxresdefault.jpg",
+    poster: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
+    trailerUrl: "https://www.youtube.com/embed/uYPbbksJxIg",
+    description: "Câu chuyện nghẹt thở của đạo diễn Christopher Nolan về nhà vật lý J. Robert Oppenheimer và dự án chế tạo vũ khí hạt nhân.",
+    director: "Christopher Nolan",
+    cast: "Cillian Murphy, Emily Blunt, Matt Damon, Robert Downey Jr."
+  },
+  {
+    id: "m-hero-7",
+    title: "Na Tra: Ma Đồng Giáng Thế",
+    vietnameseTitle: "Ne Zha (Hoạt Hình 3D Tiên Hiệp)",
+    tagline: "NGHỊCH THIÊN CẢI MỆNH — BÙNG NỔ PHÒNG VÉ",
+    genre: "Hoạt hình, Tiên hiệp, Hành động",
+    duration: "110 phút",
+    rating: 9.3,
+    reviewsCount: "26.4K",
+    ageRating: "P",
+    format: ["IMAX", "3D", "2D"],
+    backdrop: "https://img.youtube.com/vi/daoCb8oDf1k/maxresdefault.jpg",
+    poster: "https://image.tmdb.org/t/p/w500/phM9bb6s9c60LA8qwsdk7U1N2cS.jpg",
+    trailerUrl: "https://www.youtube.com/embed/daoCb8oDf1k",
+    description: "Sinh ra mang danh Ma Hoàn bị người đời xa lánh, Na Tra tự đứng lên định đoạt số phận của chính mình trong trận đại chiến.",
+    director: "Sủi Cảo (Jiaozi)",
+    cast: "Lữ Diễm Đình, Hãn Mặc, Trần Hạo, Trương Già Minh"
+  },
+  {
+    id: "m-hero-8",
+    title: "Alien: Romulus",
+    vietnameseTitle: "Alien: Romulus",
+    tagline: "NỖI KINH HOÀNG NGOÀI KHÔNG GIAN VŨ TRỤ",
+    genre: "Kinh dị, Khoa học viễn tưởng",
+    duration: "119 phút",
+    rating: 8.7,
+    reviewsCount: "19.3K",
+    ageRating: "T18",
+    format: ["IMAX", "2D Phụ đề"],
+    backdrop: "https://img.youtube.com/vi/GTNMt84KT0k/maxresdefault.jpg",
+    poster: "https://image.tmdb.org/t/p/w500/b33nnKl1GSFbao4l3fZDDqsMx0F.jpg",
+    trailerUrl: "https://www.youtube.com/embed/GTNMt84KT0k",
+    description: "Nhóm phi hành gia trẻ khám phá trạm không gian bỏ hoang và phải đối mặt với sinh vật săn mồi tàn bạo nhất vũ trụ.",
+    director: "Fede Álvarez",
+    cast: "Cailee Spaeny, David Jonsson, Archie Renaux, Isabela Merced"
+  },
+  {
+    id: "m-hero-9",
+    title: "Suzume",
+    vietnameseTitle: "Khóa Chặt Cửa Nào Suzume",
+    tagline: "HÀNH TRÌNH ĐÓNG LẠI NHỮNG CÁNH CỬA TAI ƯƠNG",
+    genre: "Hoạt hình, Tình cảm, Phiêu lưu",
+    duration: "122 phút",
+    rating: 9.0,
+    reviewsCount: "21.7K",
+    ageRating: "T13",
+    format: ["IMAX", "2D Phụ đề"],
+    backdrop: "https://img.youtube.com/vi/9UuwS0mTBNM/maxresdefault.jpg",
+    poster: "https://image.tmdb.org/t/p/w500/yStW1TXF5s7Tbtu9KjIZEaWl6HL.jpg",
+    trailerUrl: "https://www.youtube.com/embed/9UuwS0mTBNM",
+    description: "Chuyến phiêu lưu kỳ ảo khắp nước Nhật của nữ sinh Suzume nhằm phong ấn những cánh cửa giải phóng thảm họa.",
+    director: "Makoto Shinkai",
+    cast: "Nanoka Hara, Hokuto Matsumura, Eri Fukatsu"
+  }
+];
+
+const CINEGO_DATA = {
+  heroSlides: CINEGO_HERO_DATA,
+  heroMovies: CINEGO_HERO_DATA,
+
+  nowShowing: [
+    {
+      id: "ns-1",
+      title: "Deadpool & Wolverine",
+      vietnameseTitle: "Deadpool & Wolverine",
+      genres: ["Hành động", "Khoa học viễn tưởng"],
+      duration: "128 phút",
+      rating: 9.3,
+      ageRating: "T18",
+      formats: ["2D", "3D", "IMAX"],
+      poster: "https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg",
+      trailerUrl: "https://www.youtube.com/embed/73_1biulkYk",
+      description: "Cặp đôi bất hảo của vũ trụ Marvel tái xuất trong chuyến phiêu lưu nghẹt thở và hài hước nhất từ trước đến nay.",
+      releaseDate: "26/07/2026"
+    },
+    {
+      id: "ns-2",
+      title: "Inside Out 2",
+      vietnameseTitle: "Những Mảnh Ghép Cảm Xúc 2",
+      genres: ["Hoạt hình"],
+      duration: "96 phút",
+      rating: 9.5,
+      ageRating: "P",
+      formats: ["2D", "3D"],
+      poster: "https://image.tmdb.org/t/p/w500/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg",
+      trailerUrl: "https://www.youtube.com/embed/LEjhY15eCx0",
+      description: "Cuộc sống của cô bé Riley bùng nổ khi các cảm xúc mới xuất hiện và đảo lộn phòng chỉ huy tâm trí.",
+      releaseDate: "14/06/2026"
+    },
+    {
+      id: "ns-3",
+      title: "Godzilla x Kong: The New Empire",
+      vietnameseTitle: "Godzilla x Kong: Đế Chế Mới",
+      genres: ["Hành động", "Khoa học viễn tưởng"],
+      duration: "115 phút",
+      rating: 8.9,
+      ageRating: "T13",
+      formats: ["2D", "IMAX"],
+      poster: "https://image.tmdb.org/t/p/w500/tMefBSflR6PGQLv7WvFPpKLZkyk.jpg",
+      trailerUrl: "https://www.youtube.com/embed/qqrpMRDuPfc",
+      description: "Liên minh khổng lồ giữa Godzilla và Kong chống lại Skar King và đoàn quân quái thú cổ đại.",
+      releaseDate: "29/03/2026"
+    },
+    {
+      id: "ns-4",
+      title: "Oppenheimer",
+      vietnameseTitle: "Oppenheimer",
+      genres: ["Tình cảm"],
+      duration: "180 phút",
+      rating: 9.6,
+      ageRating: "T18",
+      formats: ["2D", "IMAX"],
+      poster: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
+      trailerUrl: "https://www.youtube.com/embed/uYPbbksJxIg",
+      description: "Kiệt tác tiểu sử kịch tính đoạt 7 giải Oscar của đạo diễn Christopher Nolan về vũ khí hạt nhân.",
+      releaseDate: "11/08/2026"
+    },
+    {
+      id: "ns-5",
+      title: "Alien: Romulus",
+      vietnameseTitle: "Alien: Romulus",
+      genres: ["Kinh dị", "Khoa học viễn tưởng"],
+      duration: "119 phút",
+      rating: 8.7,
+      ageRating: "T18",
+      formats: ["2D", "IMAX"],
+      poster: "https://image.tmdb.org/t/p/w500/b33nnKl1GSFbao4l3fZDDqsMx0F.jpg",
+      trailerUrl: "https://www.youtube.com/embed/GTNMt84KT0k",
+      description: "Nhóm bạn trẻ khám phá trạm không gian bỏ hoang và đối mặt với sinh vật săn mồi tàn bạo nhất vũ trụ.",
+      releaseDate: "16/08/2026"
+    },
+    {
+      id: "ns-6",
+      title: "Kung Fu Panda 4",
+      vietnameseTitle: "Kung Fu Panda 4",
+      genres: ["Hoạt hình", "Hành động"],
+      duration: "94 phút",
+      rating: 8.6,
+      ageRating: "P",
+      formats: ["2D", "3D"],
+      poster: "https://image.tmdb.org/t/p/w500/kDp1vUBnMpe8ak4rjgl3cLELqjU.jpg",
+      trailerUrl: "https://www.youtube.com/embed/_inKs4eeHiI",
+      description: "Po được chọn trở thành Thủ lĩnh Tinh thần của Thung lũng Bình Yên và phải tìm kiếm một Thần Long Đại Hiệp mới.",
+      releaseDate: "08/03/2026"
+    },
+    {
+      id: "ns-7",
+      title: "Hành Tinh Khỉ: Vương Quốc Mới",
+      vietnameseTitle: "Kingdom of the Planet of the Apes",
+      genres: ["Hành động", "Khoa học viễn tưởng"],
+      duration: "145 phút",
+      rating: 8.5,
+      ageRating: "T13",
+      formats: ["2D", "IMAX"],
+      poster: "https://image.tmdb.org/t/p/w500/gKkl37BQuKTanygYQG1pyYgLVgf.jpg",
+      trailerUrl: "https://www.youtube.com/embed/XtFI7SNtVpY",
+      description: "Nhiều thế hệ sau triều đại của Caesar, một chú vượn trẻ dũng cảm dấn thân vào hành trình định đoạt tương lai nhân loại.",
+      releaseDate: "10/05/2026"
+    },
+    {
+      id: "ns-8",
+      title: "Bad Boys: Ride or Die",
+      vietnameseTitle: "Những Gã Trai Hư: Chơi Tới Bến",
+      genres: ["Hành động"],
+      duration: "115 phút",
+      rating: 8.4,
+      ageRating: "T18",
+      formats: ["2D"],
+      poster: "https://image.tmdb.org/t/p/w500/nP6RliHjxsz4irTKsxe8FRhKZYl.jpg",
+      trailerUrl: "https://www.youtube.com/embed/hRFY_Fesa9Q",
+      description: "Cặp bài trùng cảnh sát Mike Lowrey và Marcus Burnett trở thành những kẻ bị truy nã gắt gao nhất Miami.",
+      releaseDate: "07/06/2026"
+    },
+    {
+      id: "ns-9",
+      title: "Bạch Xà: Duyên Khởi",
+      vietnameseTitle: "White Snake (Hoạt Hình 3D Tiên Hiệp)",
+      genres: ["Hoạt hình", "Tiên hiệp", "Hành động"],
+      duration: "99 phút",
+      rating: 9.1,
+      ageRating: "T13",
+      formats: ["2D", "3D", "IMAX"],
+      poster: "https://image.tmdb.org/t/p/w500/30SLnoKmYNyRPkKCYowsrGLRnJA.jpg",
+      trailerUrl: "https://www.youtube.com/embed/JeTy_t4WAfo",
+      description: "Siêu phẩm hoạt hình 3D huyền huyễn tiên hiệp mãn nhãn kể về tiền duyên ngàn năm của Bạch Tố Trinh và A Tuyên.",
+      releaseDate: "18/10/2026"
+    },
+    {
+      id: "ns-10",
+      title: "Na Tra: Ma Đồng Giáng Thế",
+      vietnameseTitle: "Ne Zha (Hoạt Hình 3D Tiên Hiệp)",
+      genres: ["Hoạt hình", "Tiên hiệp", "Hành động"],
+      duration: "110 phút",
+      rating: 9.3,
+      ageRating: "P",
+      formats: ["2D", "3D", "IMAX"],
+      poster: "https://image.tmdb.org/t/p/w500/phM9bb6s9c60LA8qwsdk7U1N2cS.jpg",
+      trailerUrl: "https://www.youtube.com/embed/daoCb8oDf1k",
+      description: "Sinh ra mang danh Ma Hoàn nghịch thiên cải mệnh, Na Tra tự định đoạt số phận trong trận đại chiến bảo vệ muôn dân.",
+      releaseDate: "20/10/2026"
+    },
+    {
+      id: "ns-11",
+      title: "Dune: Part Two",
+      vietnameseTitle: "Hành Tinh Cát: Phần Hai",
+      genres: ["Hành động", "Khoa học viễn tưởng"],
+      duration: "166 phút",
+      rating: 9.4,
+      ageRating: "T16",
+      formats: ["2D", "IMAX"],
+      poster: "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
+      trailerUrl: "https://www.youtube.com/embed/Way9Dexny3w",
+      description: "Paul Atreides liên minh cùng Chani và tộc người Fremen để trả thù những kẻ hủy diệt gia tộc trên hành tinh Arrakis.",
+      releaseDate: "01/03/2026"
+    },
+    {
+      id: "ns-12",
+      title: "One Piece Film Red",
+      vietnameseTitle: "Đảo Hải Tặc: Phim Red",
+      genres: ["Hoạt hình", "Hành động"],
+      duration: "115 phút",
+      rating: 8.9,
+      ageRating: "T13",
+      formats: ["2D", "3D", "IMAX"],
+      poster: "https://image.tmdb.org/t/p/w500/8ibfhe4P7rhmn3lrPhOZzIJHA2B.jpg",
+      trailerUrl: "https://www.youtube.com/embed/89JWRYEIG-s",
+      description: "Giọng hát của Uta - diva huyền thoại và con gái của Tứ Hoàng Shanks Tóc Đỏ làm rung chuyển toàn bộ Tân Thế Giới.",
+      releaseDate: "25/08/2026"
+    },
+    {
+      id: "ns-13",
+      title: "Suzume",
+      vietnameseTitle: "Khóa Chặt Cửa Nào",
+      genres: ["Hoạt hình", "Tình cảm"],
+      duration: "122 phút",
+      rating: 9.0,
+      ageRating: "T13",
+      formats: ["2D", "IMAX"],
+      poster: "https://image.tmdb.org/t/p/w500/yStW1TXF5s7Tbtu9KjIZEaWl6HL.jpg",
+      trailerUrl: "https://www.youtube.com/embed/9UuwS0mTBNM",
+      description: "Hành trình khắp đất nước Nhật Bản của nữ sinh Suzume và Souta để đóng lại những cánh cửa giải thoát hiểm họa.",
+      releaseDate: "10/03/2026"
+    }
+  ],
+
+  comingSoon: [
+    {
+      id: "cs-1",
+      title: "Spider-Man: Beyond the Spider-Verse",
+      vietnameseTitle: "Người Nhện: Du Hành Đa Vũ Trụ",
+      genres: ["Hoạt hình", "Hành động", "Viễn tưởng"],
+      releaseDate: "Khởi chiếu: 15/11/2026",
+      formats: ["IMAX 3D", "2D"],
+      poster: "https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg",
+      trailerUrl: "https://www.youtube.com/embed/cqGjhVJWtEg",
+      description: "Chương cuối cùng đầy kịch tính của Miles Morales khi phải đối mặt với số phận của toàn bộ mạng lưới đa vũ trụ."
+    },
+    {
+      id: "cs-2",
+      title: "The Batman: Part II",
+      vietnameseTitle: "Hiệp Sĩ Bóng Đêm: Phần 2",
+      genres: ["Hành động", "Tâm lý", "Kinh dị"],
+      releaseDate: "Khởi chiếu: 02/12/2026",
+      formats: ["IMAX", "2D"],
+      poster: "https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg",
+      trailerUrl: "https://www.youtube.com/embed/mqqft2x_Aa4",
+      description: "Bruce Wayne tiếp tục lột trần những góc khuất thối nát và đối đầu với kẻ thù mới nguy hiểm tại thành phố Gotham ngập lụt."
+    },
+    {
+      id: "cs-3",
+      title: "Interstellar (Tái Chiếu IMAX Laser)",
+      vietnameseTitle: "Hố Đen Tử Thần",
+      genres: ["Khoa học viễn tưởng", "Tâm lý"],
+      releaseDate: "Khởi chiếu: 25/11/2026",
+      formats: ["IMAX Laser"],
+      poster: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+      trailerUrl: "https://www.youtube.com/embed/zSWdZVtXT7E",
+      description: "Trải nghiệm lại siêu phẩm điện ảnh không gian vĩ đại của Christopher Nolan trên màn hình khổng lồ IMAX Laser."
+    },
+    {
+      id: "cs-4",
+      title: "Avatar: Fire and Ash",
+      vietnameseTitle: "Avatar: Lửa & Tro Tàn",
+      genres: ["Khoa học viễn tưởng", "Phiêu lưu"],
+      releaseDate: "Khởi chiếu: 18/12/2026",
+      formats: ["IMAX 3D", "HFR 3D"],
+      poster: "https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg",
+      trailerUrl: "https://www.youtube.com/embed/d9MyW72ELq0",
+      description: "James Cameron đưa khán giả khám phá một thị tộc Na'vi tàn nhẫn gắn liền với núi lửa và bóng tối trên hành tinh Pandora."
+    }
+  ],
+
+  cinemas: [
+    {
+      id: "cine-1",
+      name: "CINEGO Landmark 81 IMAX",
+      city: "TP. Hồ Chí Minh",
+      district: "Bình Thạnh",
+      address: "Tầng B1, Tòa Landmark 81, Vinhomes Central Park, 720A Điện Biên Phủ, P.22, Bình Thạnh",
+      distance: "1.2 km",
+      image: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=800&auto=format&fit=crop&q=80",
+      amenities: ["IMAX Laser", "Dolby Atmos", "Sweetbox Ghế Đôi", "Gold Class Lounge", "Bãi Đỗ Xe Tiện Lợi"],
+      rating: 4.9,
+      phone: "1900 8181"
+    },
+    {
+      id: "cine-2",
+      name: "CINEGO Vincom Center Đồng Khởi",
+      city: "TP. Hồ Chí Minh",
+      district: "Quận 1",
+      address: "Tầng 3, TTTM Vincom Center, 72 Lê Thánh Tôn & 45A Lý Tự Trọng, Bến Nghé, Quận 1",
+      distance: "3.4 km",
+      image: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&auto=format&fit=crop&q=80",
+      amenities: ["Dolby Atmos", "Sweetbox Ghế Đôi", "Quầy Bar Cinema", "Thanh Toán Không Tiền Mặt"],
+      rating: 4.8,
+      phone: "1900 8182"
+    },
+    {
+      id: "cine-3",
+      name: "CINEGO Hùng Vương Plaza",
+      city: "TP. Hồ Chí Minh",
+      district: "Quận 5",
+      address: "Tầng 7, Hùng Vương Plaza, 126 Hồng Bàng, Phường 12, Quận 5",
+      distance: "5.8 km",
+      image: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&auto=format&fit=crop&q=80",
+      amenities: ["Rạp 3D Cao Cấp", "Ghế Sofa VIP", "Khu Vui Chơi Trẻ Em", "Bãi Xe Rộng Rãi"],
+      rating: 4.7,
+      phone: "1900 8183"
+    },
+    {
+      id: "cine-4",
+      name: "CINEGO Metropolis Liễu Giai",
+      city: "Hà Nội",
+      district: "Ba Đình",
+      address: "Tầng 4, Vincom Center Metropolis, 29 Liễu Giai, Ngọc Khánh, Ba Đình",
+      distance: "2.1 km",
+      image: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=800&auto=format&fit=crop&q=80",
+      amenities: ["IMAX Laser", "Dolby Atmos", "Phòng Chờ Hạng Thương Gia", "Sweetbox"],
+      rating: 4.9,
+      phone: "1900 8184"
+    },
+    {
+      id: "cine-5",
+      name: "CINEGO Royal City Mega Mall",
+      city: "Hà Nội",
+      district: "Thanh Xuân",
+      address: "Tầng B2, TTTM Vincom Mega Mall Royal City, 72A Nguyễn Trãi, Thượng Đình, Thanh Xuân",
+      distance: "4.5 km",
+      image: "https://images.unsplash.com/photo-1574267432553-4b4628081c31?w=800&auto=format&fit=crop&q=80",
+      amenities: ["10 Phòng Chiếu", "Dolby Atmos", "Sweetbox", "Quầy Bắp Nước Tự Động"],
+      rating: 4.8,
+      phone: "1900 8185"
+    },
+    {
+      id: "cine-6",
+      name: "CINEGO Riverside Đà Nẵng",
+      city: "Đà Nẵng",
+      district: "Sơn Trà",
+      address: "Tầng 4, TTTM Vincom Plaza Đà Nẵng, 910A Ngô Quyền, An Hải Bắc, Sơn Trà",
+      distance: "1.8 km",
+      image: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=800&auto=format&fit=crop&q=80",
+      amenities: ["IMAX Laser Mới Nhất", "View Cầu Sông Hàn", "Dolby Atmos 7.1", "Sweetbox"],
+      rating: 4.9,
+      phone: "1900 8186"
+    }
+  ],
+
+  showtimes: [
+    { time: "09:15", format: "2D Phụ đề", room: "Cinema 01 (Laser)", price: 95000 },
+    { time: "11:30", format: "2D Lồng tiếng", room: "Cinema 03 (Standard)", price: 85000 },
+    { time: "14:00", format: "IMAX 3D Laser", room: "Phòng Chiếu IMAX", price: 160000 },
+    { time: "16:45", format: "2D Phụ đề", room: "Cinema 02 (Dolby Atmos)", price: 110000 },
+    { time: "19:20", format: "IMAX 3D Laser", room: "Phòng Chiếu IMAX", price: 175000 },
+    { time: "21:45", format: "2D Phụ đề VIP", room: "Cinema 04 (Gold Class)", price: 120000 },
+    { time: "23:30", format: "2D Phụ đề", room: "Cinema 01 (Laser)", price: 90000 }
+  ],
+
+  combos: [
+    {
+      id: "cb-1",
+      name: "Combo Solo CINEGO",
+      desc: "1 Bắp ngọt 60oz giòn tan + 1 Nước ngọt có ga 32oz mát lạnh",
+      price: 69000,
+      image: "https://images.unsplash.com/photo-1578849278619-e73505e9610f?w=300&auto=format&fit=crop&q=80",
+      badge: "Tiết kiệm 20%"
+    },
+    {
+      id: "cb-2",
+      name: "Combo Couple Bestseller",
+      desc: "1 Bắp lớn 85oz (Tùy chọn Phô Mai/Caramel) + 2 Nước ngọt lớn 32oz",
+      price: 99000,
+      image: "https://images.unsplash.com/photo-1585647347483-22b66260dfff?w=300&auto=format&fit=crop&q=80",
+      badge: "Bán chạy nhất"
+    },
+    {
+      id: "cb-3",
+      name: "Combo Family Party",
+      desc: "2 Bắp khổng lồ 85oz + 4 Nước ngọt + 1 Snack Khoai tây phô mai cao cấp",
+      price: 179000,
+      image: "https://images.unsplash.com/photo-1505686994434-e3cc5abf1330?w=300&auto=format&fit=crop&q=80",
+      badge: "Gia đình"
+    },
+    {
+      id: "cb-4",
+      name: "Bắp Rang Caramel Phô Mai Nóng",
+      desc: "Hạt bắp nổ thơm lừng phủ ngập xốt Caramel mặn ngọt hoặc bột Phô Mai béo ngậy",
+      price: 49000,
+      image: "https://images.unsplash.com/photo-1572177812156-58036aae439c?w=300&auto=format&fit=crop&q=80",
+      badge: "Hot snack"
+    },
+    {
+      id: "cb-5",
+      name: "Trà Đào Cam Sả Tươi CINEGO",
+      desc: "Ly 500ml trà đào thơm mát thanh nhiệt kèm 2 miếng đào giòn ngâm đặc biệt",
+      price: 39000,
+      image: "https://images.unsplash.com/photo-1556881286-fc6915169721?w=300&auto=format&fit=crop&q=80",
+      badge: "Thức uống tươi"
+    }
+  ],
+
+  promotions: [
+    {
+      id: "promo-1",
+      title: "Thành Viên Mới - Giảm 50% Vé Đầu",
+      desc: "Đăng ký tài khoản CINEGO nhận ngay voucher giảm 50% cho giao dịch đặt vé đầu tiên trên web.",
+      code: "CINEGO50",
+      validUntil: "31/12/2026",
+      tag: "Dành cho bạn mới",
+      icon: "gift"
+    },
+    {
+      id: "promo-2",
+      title: "Thứ Tư CINEGO - Vé Đồng Giá 55.000đ",
+      desc: "Áp dụng vào mỗi thứ Tư hàng tuần cho mọi suất chiếu 2D tiêu chuẩn tại tất cả cụm rạp trên toàn quốc.",
+      code: "HAPPYWED",
+      validUntil: "Mỗi thứ Tư",
+      tag: "Hàng tuần",
+      icon: "calendar"
+    },
+    {
+      id: "promo-3",
+      title: "Ưu Đãi Học Sinh - Sinh Viên 45K",
+      desc: "Đồng giá vé xem phim chỉ 45.000đ từ thứ 2 đến thứ 6 khi xuất trình thẻ HSSV hợp lệ hoặc đặt online.",
+      code: "STUDENT45",
+      validUntil: "30/11/2026",
+      tag: "HSSV / U22",
+      icon: "graduation-cap"
+    },
+    {
+      id: "promo-4",
+      title: "Hoàn Tiền 20K Qua MoMo / VNPAY",
+      desc: "Nhận ngay hoàn tiền trực tiếp 20.000đ khi thanh toán đơn hàng từ 150.000đ qua ví điện tử liên kết.",
+      code: "EWALLET20",
+      validUntil: "15/12/2026",
+      tag: "Thanh toán",
+      icon: "wallet"
+    }
+  ],
+
+  reviews: [
+    {
+      id: "rev-1",
+      name: "Nguyễn Hoàng Nam",
+      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
+      movie: "Deadpool & Wolverine (IMAX Laser)",
+      rating: 5,
+      date: "2 ngày trước",
+      content: "Chất lượng âm thanh IMAX tại Landmark 81 cực kỳ mãn nhãn, âm bass rung chuyển cả phòng chiếu. Khâu đặt vé trên CINEGO nhanh gọn trong 1 phút, nhận mã QR quét vào cổng ngay không phải xếp hàng!"
+    },
+    {
+      id: "rev-2",
+      name: "Trần Phương Anh",
+      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
+      movie: "Inside Out 2",
+      rating: 5,
+      date: "3 ngày trước",
+      content: "Giao diện website CINEGO thiết kế rất hiện đại và sang trọng, sơ đồ ghế phân biệt rõ ghế thường, VIP và Sweetbox cho cặp đôi rất trực quan. Bắp rang phô mai thơm ngon chuẩn vị!"
+    },
+    {
+      id: "rev-3",
+      name: "Lê Quang Huy",
+      avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80",
+      movie: "Godzilla x Kong",
+      rating: 5,
+      date: "5 ngày trước",
+      content: "Hệ thống thanh toán demo mượt mà, hỗ trợ đủ các phương thức ví điện tử thông dụng. Rạp chiếu Metropolis Hà Nội không gian đẳng cấp, nhân viên hướng dẫn nhiệt tình."
+    },
+    {
+      id: "rev-4",
+      name: "Đỗ Thanh Thảo",
+      avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80",
+      movie: "Oppenheimer",
+      rating: 4.9,
+      date: "1 tuần trước",
+      content: "Trải nghiệm trên điện thoại cực mượt, không hề bị lag hay vỡ khung hình. Tính năng lọc phim theo thể loại và chọn suất chiếu nhanh rất tiện ích."
+    }
+  ]
+};
+
+window.CINEGO_DATA = CINEGO_DATA;
+window.CINEGO_HERO_DATA = CINEGO_HERO_DATA;
