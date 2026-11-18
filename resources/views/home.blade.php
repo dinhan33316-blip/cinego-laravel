@@ -272,7 +272,7 @@
 
     <!-- Lớp 1 (z-10): Video trailer YouTube tràn viền toàn màn hình -->
     <div id="hero-video-wrapper" class="absolute inset-0 overflow-hidden pointer-events-none" style="z-index: 10;">
-      <iframe id="hero-bg-video" class="hero-bg-iframe" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      <iframe id="hero-bg-video" class="hero-bg-iframe" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen frameborder="0" title="Cinego Hero Background Trailer"></iframe>
     </div>
 
     <!-- Lớp 2 (z-20): Màn chắn ảnh nền (curtain) che kín video khi YouTube nạp/đổi slide -->

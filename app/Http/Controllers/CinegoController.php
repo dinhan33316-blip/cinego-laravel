@@ -30,26 +30,48 @@ class CinegoController extends Controller
         $toClientMovie = static function ($movie, $upcoming = false) {
             $genres = array_values(array_filter(array_map('trim', explode(',', $movie->genre ?? ''))));
             $formats = array_values(array_filter(array_map('trim', explode(',', $movie->formats ?? ''))));
+
+            $trailerUrl = $movie->trailer_url ?: ($upcoming
+                ? 'https://www.youtube.com/embed/cqGjhVJWtEg'
+                : 'https://www.youtube.com/embed/73_1biulkYk');
+
+            preg_match('/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/', $trailerUrl, $ytMatch);
+            $videoId = $ytMatch[1] ?? '';
+            $backdrop = $videoId ? "https://img.youtube.com/vi/{$videoId}/maxresdefault.jpg" : ($movie->poster ?: '');
+
+            $genreList = $genres ?: [$upcoming ? 'Khoa học viễn tưởng' : 'Hành động'];
+            $formatList = $formats ?: ($upcoming ? ['IMAX', '2D'] : ['2D', 'IMAX']);
+
             $data = [
-                'id' => ($upcoming ? 'db-cs-' : 'db-m-') . $movie->id,
-                'title' => $movie->title,
+                'id'              => ($upcoming ? 'db-cs-' : 'db-m-') . $movie->id,
+                'db_id'           => $movie->id,
+                'title'           => $movie->title,
                 'vietnameseTitle' => $movie->vietnamese_title ?: $movie->title,
-                'genres' => $genres ?: [$upcoming ? 'Khoa học viễn tưởng' : 'Hành động'],
-                'formats' => $formats ?: ($upcoming ? ['IMAX', '2D'] : ['2D', 'IMAX']),
-                'poster' => $movie->poster,
-                'trailerUrl' => $movie->trailer_url ?: ($upcoming
-                    ? 'https://www.youtube.com/embed/cqGjhVJWtEg'
-                    : 'https://www.youtube.com/embed/73_1biulkYk'),
-                'description' => strip_tags($movie->description ?? ''),
+                'vietnamese_title'=> $movie->vietnamese_title ?: $movie->title,
+                'genres'          => $genreList,
+                'genre'           => $movie->genre ?: implode(', ', $genreList),
+                'formats'         => $formatList,
+                'format'          => $formatList,
+                'poster'          => $movie->poster,
+                'movie_poster'    => $movie->poster,
+                'backdrop'        => $backdrop,
+                'trailerUrl'      => $trailerUrl,
+                'trailer_url'     => $trailerUrl,
+                'description'     => strip_tags($movie->description ?? ''),
             ];
 
             if ($upcoming) {
-                $data['releaseDate'] = $movie->release_date ?: 'Khởi chiếu: Sắp tới';
+                $release = $movie->release_date ?: 'Khởi chiếu: Sắp tới';
+                $data['releaseDate']  = $release;
+                $data['release_date'] = $release;
             } else {
-                $data['duration'] = $movie->duration ?: '120 phút';
-                $data['rating'] = (float) ($movie->rating ?? 9.0);
-                $data['ageRating'] = $movie->age_limit ?: 'P';
-                $data['releaseDate'] = $movie->release_date ?: date('d/m/Y');
+                $data['duration']     = $movie->duration ?: '120 phút';
+                $data['rating']       = (float) ($movie->rating ?? 9.0);
+                $data['ageRating']    = $movie->age_limit ?: 'P';
+                $data['age_limit']    = $movie->age_limit ?: 'P';
+                $release = $movie->release_date ?: date('d/m/Y');
+                $data['releaseDate']  = $release;
+                $data['release_date'] = $release;
             }
 
             return $data;
@@ -453,7 +475,50 @@ class CinegoController extends Controller
                 }
                 $movies = $query->orderBy('id')->get();
 
-                return response()->json(['success' => true, 'count' => $movies->count(), 'movies' => $movies]);
+                $mapMovie = static function ($m) {
+                    $isUpcoming = in_array($m->status, ['upcoming', 'coming_soon'], true);
+                    $genres = array_values(array_filter(array_map('trim', explode(',', $m->genre ?? ''))));
+                    $formats = !empty($m->formats)
+                        ? array_values(array_filter(array_map('trim', explode(',', $m->formats))))
+                        : ($isUpcoming ? ['IMAX', '2D'] : ['2D', 'IMAX']);
+
+                    $trailerUrl = $m->trailer_url ?: ($isUpcoming
+                        ? 'https://www.youtube.com/embed/cqGjhVJWtEg'
+                        : 'https://www.youtube.com/embed/73_1biulkYk');
+
+                    preg_match('/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/', $trailerUrl, $ytMatch);
+                    $videoId = $ytMatch[1] ?? '';
+                    $backdrop = $videoId ? "https://img.youtube.com/vi/{$videoId}/maxresdefault.jpg" : ($m->poster ?: '');
+
+                    $genreList = $genres ?: [$isUpcoming ? 'Khoa học viễn tưởng' : 'Hành động'];
+
+                    return [
+                        'id'               => $m->id,
+                        'db_id'            => $m->id,
+                        'title'            => $m->title,
+                        'vietnameseTitle'  => $m->vietnamese_title ?: $m->title,
+                        'vietnamese_title' => $m->vietnamese_title ?: $m->title,
+                        'genres'           => $genreList,
+                        'genre'            => $m->genre ?: implode(', ', $genreList),
+                        'duration'         => $m->duration ?: '120 phút',
+                        'rating'           => (float) ($m->rating ?? 9.0),
+                        'ageRating'        => $m->age_limit ?: 'P',
+                        'age_limit'        => $m->age_limit ?: 'P',
+                        'formats'          => $formats,
+                        'format'           => $formats,
+                        'poster'           => $m->poster,
+                        'movie_poster'     => $m->poster,
+                        'backdrop'         => $backdrop,
+                        'trailerUrl'       => $trailerUrl,
+                        'trailer_url'      => $trailerUrl,
+                        'description'      => strip_tags($m->description ?? ''),
+                        'releaseDate'      => $m->release_date ?: date('d/m/Y'),
+                        'release_date'     => $m->release_date ?: date('d/m/Y'),
+                        'status'           => $m->status,
+                    ];
+                };
+
+                return response()->json(['success' => true, 'count' => $movies->count(), 'movies' => $movies->map($mapMovie)->values()->all()]);
 
             case 'get_movie':
                 $movieId = (int) ($request->input('id') ?: $request->query('id', 0));
@@ -462,7 +527,47 @@ class CinegoController extends Controller
                     return response()->json(['success' => false, 'message' => 'Không tìm thấy phim'], 404);
                 }
 
-                return response()->json(['success' => true, 'movie' => $movie]);
+                $isUpcoming = in_array($movie->status, ['upcoming', 'coming_soon'], true);
+                $genres = array_values(array_filter(array_map('trim', explode(',', $movie->genre ?? ''))));
+                $formats = !empty($movie->formats)
+                    ? array_values(array_filter(array_map('trim', explode(',', $movie->formats))))
+                    : ($isUpcoming ? ['IMAX', '2D'] : ['2D', 'IMAX']);
+
+                $trailerUrl = $movie->trailer_url ?: ($isUpcoming
+                    ? 'https://www.youtube.com/embed/cqGjhVJWtEg'
+                    : 'https://www.youtube.com/embed/73_1biulkYk');
+
+                preg_match('/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/', $trailerUrl, $ytMatch);
+                $videoId = $ytMatch[1] ?? '';
+                $backdrop = $videoId ? "https://img.youtube.com/vi/{$videoId}/maxresdefault.jpg" : ($movie->poster ?: '');
+                $genreList = $genres ?: [$isUpcoming ? 'Khoa học viễn tưởng' : 'Hành động'];
+
+                $mapped = [
+                    'id'               => $movie->id,
+                    'db_id'            => $movie->id,
+                    'title'            => $movie->title,
+                    'vietnameseTitle'  => $movie->vietnamese_title ?: $movie->title,
+                    'vietnamese_title' => $movie->vietnamese_title ?: $movie->title,
+                    'genres'           => $genreList,
+                    'genre'            => $movie->genre ?: implode(', ', $genreList),
+                    'duration'         => $movie->duration ?: '120 phút',
+                    'rating'           => (float) ($movie->rating ?? 9.0),
+                    'ageRating'        => $movie->age_limit ?: 'P',
+                    'age_limit'        => $movie->age_limit ?: 'P',
+                    'formats'          => $formats,
+                    'format'           => $formats,
+                    'poster'           => $movie->poster,
+                    'movie_poster'     => $movie->poster,
+                    'backdrop'         => $backdrop,
+                    'trailerUrl'       => $trailerUrl,
+                    'trailer_url'      => $trailerUrl,
+                    'description'      => strip_tags($movie->description ?? ''),
+                    'releaseDate'      => $movie->release_date ?: date('d/m/Y'),
+                    'release_date'     => $movie->release_date ?: date('d/m/Y'),
+                    'status'           => $movie->status,
+                ];
+
+                return response()->json(['success' => true, 'movie' => $mapped]);
 
             case 'login':
                 $username = trim((string) $request->input('username', ''));

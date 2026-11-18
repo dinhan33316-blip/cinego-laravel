@@ -2856,7 +2856,12 @@ if (document.readyState === "loading") {
 
     function extractHeroVideoId(url) {
       if (!url) return "";
-      const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+      if (typeof url !== "string") return "";
+      const trimmed = url.trim();
+      if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) {
+        return trimmed;
+      }
+      const match = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
       return match ? match[1] : "";
     }
 
@@ -2899,6 +2904,8 @@ if (document.readyState === "loading") {
           if (!isMuted) {
             iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'setVolume', args: [100] }), '*');
           }
+          // Luôn gửi playVideo để đảm bảo video tiếp tục phát
+          iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
         } catch (e) {}
       }
     }
@@ -2935,13 +2942,15 @@ if (document.readyState === "loading") {
 
       if (data.event === "onReady" || data.event === "initialDelivery") {
         ytReadyForCurrentSlide = true;
-        if (data.event === "onReady") {
-          const iframe = document.getElementById("hero-bg-video");
-          if (iframe && iframe.contentWindow) {
-            try {
-              iframe.contentWindow.postMessage(JSON.stringify({ event: "command", func: "addEventListener", args: ["onStateChange"] }), "*");
-            } catch (e) {}
-          }
+        const iframe = document.getElementById("hero-bg-video");
+        if (iframe && iframe.contentWindow) {
+          try {
+            iframe.contentWindow.postMessage(JSON.stringify({ event: "command", func: "addEventListener", args: ["onStateChange"] }), "*");
+            if (isMuted) {
+              iframe.contentWindow.postMessage(JSON.stringify({ event: "command", func: "mute", args: [] }), "*");
+            }
+            iframe.contentWindow.postMessage(JSON.stringify({ event: "command", func: "playVideo", args: [] }), "*");
+          } catch (e) {}
         }
         syncHeroAudio();
       }
@@ -2955,8 +2964,23 @@ if (document.readyState === "loading") {
         playerState = data.info;
       }
 
+      // Khi video thực sự phát (playerState === 1), hạ ngay màn chắn ảnh nền để hiển thị trailer
       if (playerState === 1) {
         hasHandledVideoEnd = false;
+        const img = document.getElementById("hero-backdrop-img");
+        if (img) {
+          img.style.transition = "opacity 0.8s ease-in-out";
+          img.style.opacity = "0";
+        }
+      }
+
+      // Nếu gặp lỗi onError (video bị chặn nhúng hoặc lỗi ID), giữ lại ảnh backdrop để không bị đen màn hình
+      if (data.event === "onError") {
+        const img = document.getElementById("hero-backdrop-img");
+        if (img) {
+          img.style.transition = "opacity 0.5s ease-in-out";
+          img.style.opacity = "0.99";
+        }
       }
 
       if (playerState === 0) {
@@ -3029,29 +3053,32 @@ if (document.readyState === "loading") {
         });
       }
 
-      // 4. Lấy videoId của trailer
-      let trailerUrl = slide.trailerUrl || "";
+      // 4. Lấy videoId của trailer (hỗ trợ cả trailerUrl lẫn trailer_url)
+      let trailerUrl = slide.trailerUrl || slide.trailer_url || "";
       if (!trailerUrl && dataObj && Array.isArray(dataObj.nowShowing)) {
         const match = dataObj.nowShowing.find(m =>
           m.title && (m.title.toLowerCase() === (slide.title || "").toLowerCase() ||
           (slide.vietnameseTitle && m.title.toLowerCase() === slide.vietnameseTitle.toLowerCase()))
         );
-        if (match && match.trailerUrl) trailerUrl = match.trailerUrl;
+        if (match) trailerUrl = match.trailerUrl || match.trailer_url || "";
       }
-      const videoId = extractHeroVideoId(trailerUrl);
+      let videoId = extractHeroVideoId(trailerUrl);
+      if (!videoId) {
+        videoId = "73_1biulkYk";
+      }
 
       // 5. Cập nhật màn chắn #hero-backdrop-img (đóng kín 0ms)
       const img = document.getElementById("hero-backdrop-img");
       if (img) {
         img.style.transition = "none";
         img.style.opacity = "1";
-        img.src = slide.backdrop || (videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : (slide.poster || ""));
+        img.src = slide.backdrop || (videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : (slide.poster || slide.movie_poster || ""));
         img.classList.remove("hero-ken-burns");
         void img.offsetWidth; // kích hoạt reflow
         img.classList.add("hero-ken-burns");
       }
 
-      // 6. Cập nhật #hero-bg-video.src (tuyệt đối KHÔNG có tham số playlist=, giữ nguyên trạng thái mute)
+      // 6. Cập nhật #hero-bg-video.src
       const iframe = document.getElementById("hero-bg-video");
       if (iframe && videoId) {
         clearAudioAndListenerTimers();
@@ -3059,12 +3086,27 @@ if (document.readyState === "loading") {
         hasHandledVideoEnd = false;
         lastHeroSwitchAt = Date.now();
 
-        const muteParam = isMuted ? 1 : 0;
-        const originParam = encodeURIComponent(window.location.origin);
-        const embedSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${muteParam}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1&enablejsapi=1&origin=${originParam}`;
+        // Xử lý tham số origin: Tuyệt đối KHÔNG truyền origin trên localhost/127.0.0.1 hoặc có port
+        // để tránh vi phạm chính sách của YouTube API gây ra lỗi màn hình đen.
+        let originParam = "";
+        try {
+          const host = window.location.hostname || "";
+          const isLocal = host === "127.0.0.1" || host === "localhost" || host === "::1" || host === "" || Boolean(window.location.port);
+          if (!isLocal && window.location.origin && window.location.origin.startsWith("http")) {
+            originParam = `&origin=${encodeURIComponent(window.location.origin)}`;
+          }
+        } catch (e) {}
+
+        // Luôn khởi tạo ở trạng thái tắt tiếng (mute=1) trên URL để tuân thủ Autoplay Policy của trình duyệt
+        const embedSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1&enablejsapi=1${originParam}`;
 
         iframe.onload = () => {
           registerHeroYoutubeListener();
+          // Ngay khi nạp xong, gửi lệnh mute và playVideo để bắt đầu phát mượt mà
+          try {
+            iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'mute', args: [] }), '*');
+            iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
+          } catch (e) {}
           syncHeroAudio();
           audioSyncTimers.push(setTimeout(() => {
             if (!ytReadyForCurrentSlide) {
@@ -3097,10 +3139,10 @@ if (document.readyState === "loading") {
         });
       }
 
-      // 7. Mở màn chắn sau 3600ms (3.6 giây)
+      // 7. Mở màn chắn sau 3600ms (3.6 giây) nếu video đã sẵn sàng hoặc giữ ảnh nền an toàn nếu xảy ra sự cố
       clearTimeout(fadeTimer);
       fadeTimer = setTimeout(() => {
-        if (img) {
+        if (img && ytReadyForCurrentSlide) {
           img.style.transition = "opacity 1s ease-in-out";
           img.style.opacity = "0";
         }
