@@ -1,4 +1,17 @@
 function initCinegoApp() {
+  window.CINEGO_ROUTES = window.CINEGO_ROUTES || {
+    api: '/api',
+    chat: '/chat-ai',
+    ticket: '/send-ticket'
+  };
+
+  const getCsrfToken = () => {
+    return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+      || window.CINEGO_CSRF_TOKEN
+      || '';
+  };
+  const csrfToken = getCsrfToken();
+
   if (window.lucide) {
     window.lucide.createIcons();
   }
@@ -594,9 +607,9 @@ function initCinegoApp() {
     }
 
     try {
-      const response = await fetch("api.php?action=submit_review", {
+      const response = await fetch(`${window.CINEGO_ROUTES.api}?action=submit_review`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": csrfToken },
         body: JSON.stringify({
           ticket_code: ticketCode,
           rating: rating,
@@ -640,7 +653,9 @@ function initCinegoApp() {
     if (!reviewsGrid) return;
 
     try {
-      const res = await fetch("api.php?action=get_reviews");
+      const res = await fetch(`${window.CINEGO_ROUTES.api}?action=get_reviews`, {
+        headers: { "X-CSRF-TOKEN": csrfToken }
+      });
       const data = await res.json();
 
       if (data.success && Array.isArray(data.reviews) && data.reviews.length > 0) {
@@ -1701,7 +1716,9 @@ function initCinegoApp() {
     const movieTitle = AppState.booking.movie.title;
     const showtime = AppState.booking.showtime ? `${AppState.booking.showtime.time} • ${AppState.booking.date}` : "";
 
-    fetch(`api.php?action=get_occupied_seats&movie=${encodeURIComponent(movieTitle)}&showtime=${encodeURIComponent(showtime)}`)
+    fetch(`${window.CINEGO_ROUTES.api}?action=get_occupied_seats&movie=${encodeURIComponent(movieTitle)}&showtime=${encodeURIComponent(showtime)}`, {
+      headers: { "X-CSRF-TOKEN": csrfToken }
+    })
       .then(res => res.json())
       .then(data => {
         if (data.success && Array.isArray(data.occupiedSeats)) {
@@ -2095,10 +2112,11 @@ function initCinegoApp() {
       paymentMethod: paymentNames[bookingData.paymentMethod] || "Ví điện tử"
     };
 
-    fetch("send-ticket.php", {
+    fetch(window.CINEGO_ROUTES.ticket, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "X-CSRF-TOKEN": csrfToken
       },
       body: JSON.stringify(payload)
     })
@@ -2119,11 +2137,18 @@ function initCinegoApp() {
       } else if (resData.dbError) {
         console.warn("[MySQL CINEGO Warning]:", resData.dbError);
       }
-      showToast(`Vé điện tử và mã QR đã được gửi thành công đến email ${payload.customerEmail}`, "success");
+      if (resData.dbSaved) {
+        const message = resData.emailSent
+          ? `Vé điện tử và mã QR đã được gửi thành công đến email ${payload.customerEmail}`
+          : "Đặt vé thành công. Gửi email chưa được cấu hình trong ứng dụng.";
+        showToast(message, "success");
+      } else {
+        showToast(resData.dbError || "Không thể lưu vé. Vui lòng thử lại.", "error");
+      }
     })
     .catch(err => {
       console.warn("Send ticket warning:", err);
-      showToast(`Vé điện tử và mã QR đã được gửi thành công đến email ${payload.customerEmail}`, "success");
+      showToast("Không thể xác nhận đặt vé với máy chủ. Vui lòng tra cứu vé trước khi thử lại.", "error");
     });
   }
 
@@ -2415,10 +2440,11 @@ function initCinegoApp() {
     });
 
     try {
-      const response = await fetch("chat-ai.php", {
+      const response = await fetch(window.CINEGO_ROUTES.chat, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "X-CSRF-TOKEN": csrfToken
         },
         body: JSON.stringify({
           message: text,
@@ -2439,7 +2465,7 @@ function initCinegoApp() {
       try {
         data = await response.json();
       } catch (jsonErr) {
-        console.error("[CINEGO Chatbot AI] Không thể phân tích phản hồi JSON từ chat-ai.php:", jsonErr);
+        console.error("[CINEGO Chatbot AI] Không thể phân tích phản hồi JSON từ /chat-ai:", jsonErr);
         throw jsonErr;
       }
 
@@ -2450,7 +2476,7 @@ function initCinegoApp() {
       chatHistory.push({ role: "model", content: botReply });
 
     } catch (err) {
-      console.error("[CINEGO Chatbot AI] Chi tiết lỗi khi kết nối chat-ai.php:", err);
+      console.error("[CINEGO Chatbot AI] Chi tiết lỗi khi kết nối /chat-ai:", err);
       hideTypingIndicator();
 
       const fallbackReply = "Hệ thống AI đang tạm thời bận. Bạn có thể chọn trực tiếp các gợi ý nhanh hoặc bấm nút Đặt Vé ở thanh điều hướng để xem lịch chiếu hôm nay nhé!";
@@ -2621,7 +2647,9 @@ function initCinegoApp() {
       </div>
     `;
 
-    fetch(`api.php?action=lookup_tickets&keyword=${encodeURIComponent(keyword)}`)
+    fetch(`${window.CINEGO_ROUTES.api}?action=lookup_tickets&keyword=${encodeURIComponent(keyword)}`, {
+      headers: { "X-CSRF-TOKEN": csrfToken }
+    })
       .then(res => res.json())
       .then(data => {
         if (!data.success || !Array.isArray(data.tickets) || data.tickets.length === 0) {
@@ -2728,8 +2756,9 @@ function initCinegoApp() {
     formData.append("ticket_code", ticketCode);
     if (ticketId) formData.append("id", ticketId);
 
-    fetch("api.php?action=cancel_ticket", {
+    fetch(`${window.CINEGO_ROUTES.api}?action=cancel_ticket`, {
       method: "POST",
+      headers: { "X-CSRF-TOKEN": csrfToken },
       body: formData
     })
     .then(res => res.json())
