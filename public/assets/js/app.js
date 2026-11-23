@@ -43,6 +43,22 @@ function initCinegoApp() {
   };
   window.AppState = AppState;
 
+  // Khởi tạo danh sách 7 ngày chiếu khả dụng cho toàn bộ ứng dụng
+  const weekdays = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+  const dateOptions = [];
+  const today = new Date();
+  for (let i = 0; i < 7; i++) {
+    const d = new Date();
+    d.setDate(today.getDate() + i);
+    const dayName = i === 0 ? "Hôm nay" : i === 1 ? "Ngày mai" : weekdays[d.getDay()];
+    const dateFormatted = `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
+    dateOptions.push({
+      label: `${dayName} (${dateFormatted})`,
+      value: `${dateFormatted}/${today.getFullYear()}`
+    });
+  }
+  window.dateOptions = dateOptions;
+
   window.showToast = function(message, type = "info") {
     const container = document.getElementById("toast-container");
     if (!container) return;
@@ -132,21 +148,7 @@ function initCinegoApp() {
     const quickMovieSelect = document.getElementById("quick-movie-select");
     const quickSubmitBtn = document.getElementById("quick-submit-btn");
 
-    const weekdays = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
-    const dateOptions = [];
-    const today = new Date();
-    for (let i = 0; i < 7; i++) {
-      const d = new Date();
-      d.setDate(today.getDate() + i);
-      const dayName = i === 0 ? "Hôm nay" : i === 1 ? "Ngày mai" : weekdays[d.getDay()];
-      const dateFormatted = `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
-      dateOptions.push({
-        label: `${dayName} (${dateFormatted})`,
-        value: `${dateFormatted}/2026`
-      });
-    }
-
-    if (quickDateSelect) {
+    if (quickDateSelect && Array.isArray(dateOptions)) {
       quickDateSelect.innerHTML = dateOptions.map(opt => `<option value="${opt.value}">${opt.label}</option>`).join("");
     }
 
@@ -609,7 +611,11 @@ function initCinegoApp() {
     try {
       const response = await fetch(`${window.CINEGO_ROUTES.api}?action=submit_review`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": csrfToken },
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "X-CSRF-TOKEN": csrfToken || window.CINEGO_CSRF_TOKEN || ""
+        },
         body: JSON.stringify({
           ticket_code: ticketCode,
           rating: rating,
@@ -1499,8 +1505,8 @@ function initCinegoApp() {
 
   renderAuthUI();
 
-  const bookingModal = document.getElementById("booking-modal");
-  const bookingCloseBtn = document.getElementById("booking-close-btn");
+  const getBookingModal = () => document.getElementById("booking-modal");
+  const getBookingCloseBtn = () => document.getElementById("booking-close-btn");
 
   const stepContainers = {
     1: document.getElementById("booking-step-1"),
@@ -1512,58 +1518,112 @@ function initCinegoApp() {
 
   const stepIndicators = document.querySelectorAll(".booking-step-pill");
 
-  window.openBookingModal = function(initialData = {}) {
-    if (!bookingModal) return;
+  function openBookingModal(initialData = {}) {
+    const modal = getBookingModal();
+    if (!modal) {
+      console.warn("[Cinego] Không tìm thấy phần tử #booking-modal trong DOM!");
+      return;
+    }
 
     const targetMovieTitle = (initialData.movieTitle || "").trim().toLowerCase();
     let selectedMovie = null;
-    if (targetMovieTitle && Array.isArray(CINEGO_DATA.nowShowing)) {
-      selectedMovie = CINEGO_DATA.nowShowing.find(m => {
+    const nowShowingList = (window.CINEGO_DATA && Array.isArray(CINEGO_DATA.nowShowing))
+      ? CINEGO_DATA.nowShowing
+      : [];
+
+    if (targetMovieTitle && nowShowingList.length > 0) {
+      selectedMovie = nowShowingList.find(m => {
         const t1 = (m.title || "").toLowerCase();
         const t2 = (m.vietnameseTitle || "").toLowerCase();
-        return t1 === targetMovieTitle || t2 === targetMovieTitle || t1.includes(targetMovieTitle) || targetMovieTitle.includes(t1);
+        const t3 = (m.vietnamese_title || "").toLowerCase();
+        return t1 === targetMovieTitle || t2 === targetMovieTitle || t3 === targetMovieTitle ||
+               t1.includes(targetMovieTitle) || targetMovieTitle.includes(t1);
       });
     }
-    if (!selectedMovie && Array.isArray(CINEGO_DATA.nowShowing) && CINEGO_DATA.nowShowing.length > 0) {
-      selectedMovie = CINEGO_DATA.nowShowing[0];
+    if (!selectedMovie && nowShowingList.length > 0) {
+      selectedMovie = nowShowingList[0];
+    }
+    if (!selectedMovie) {
+      selectedMovie = {
+        id: "default-movie",
+        title: initialData.movieTitle || "Deadpool & Wolverine",
+        vietnameseTitle: initialData.movieTitle || "Deadpool & Wolverine",
+        genres: ["Hành động", "Khoa học viễn tưởng"],
+        duration: "128 phút",
+        rating: 9.3,
+        ageRating: "T18",
+        formats: ["2D", "IMAX"],
+        poster: "https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg"
+      };
+    }
+
+    const cinemaList = (window.CINEGO_DATA && Array.isArray(CINEGO_DATA.cinemas)) ? CINEGO_DATA.cinemas : [];
+    const defaultCinema = cinemaList[0] || { id: "cine-1", name: "CINEGO Landmark 81 IMAX", city: "Hồ Chí Minh" };
+    const selectedCinema = initialData.cinemaName
+      ? (cinemaList.find(c => c.name === initialData.cinemaName) || defaultCinema)
+      : defaultCinema;
+
+    const defaultDate = (dateOptions && dateOptions.length > 0 && dateOptions[0].value)
+      ? dateOptions[0].value
+      : (window.dateOptions && window.dateOptions[0] ? window.dateOptions[0].value : `${String(new Date().getDate()).padStart(2, "0")}/${String(new Date().getMonth() + 1).padStart(2, "0")}/2026`);
+    const selectedDate = initialData.date || defaultDate;
+
+    const showtimeList = (window.CINEGO_DATA && Array.isArray(CINEGO_DATA.showtimes)) ? CINEGO_DATA.showtimes : [];
+    const defaultShowtime = showtimeList[2] || showtimeList[0] || { time: "14:15", format: "2D Phụ đề", room: "Cinema 01 (Laser)", price: 95000 };
+
+    let custName = "Nguyễn Đình An";
+    let custPhone = "0901 234 567";
+    let custEmail = "dinhan33316@gmail.com";
+
+    if (AppState.currentUser) {
+      if (AppState.currentUser.name) custName = AppState.currentUser.name;
+      if (AppState.currentUser.phone) custPhone = AppState.currentUser.phone;
+      if (AppState.currentUser.email) custEmail = AppState.currentUser.email;
+    } else if (window.CINEGO_COOKIES) {
+      if (window.CINEGO_COOKIES.name) custName = window.CINEGO_COOKIES.name;
+      if (window.CINEGO_COOKIES.phone) custPhone = window.CINEGO_COOKIES.phone;
+      if (window.CINEGO_COOKIES.email) custEmail = window.CINEGO_COOKIES.email;
     }
 
     AppState.booking = {
       step: 1,
       movie: selectedMovie,
-      cinema: initialData.cinemaName
-        ? CINEGO_DATA.cinemas.find(c => c.name === initialData.cinemaName) || CINEGO_DATA.cinemas[0]
-        : CINEGO_DATA.cinemas[0],
-      date: initialData.date || dateOptions[0].value,
-      showtime: CINEGO_DATA.showtimes[2],
+      cinema: selectedCinema,
+      date: selectedDate,
+      showtime: defaultShowtime,
       seats: [],
       combos: {},
       discount: 0,
       appliedCode: "",
       customer: {
-        name: AppState.currentUser ? (AppState.currentUser.name || "Nguyễn Đình An") : "Nguyễn Đình An",
-        phone: "0901 234 567",
-        email: AppState.currentUser ? AppState.currentUser.email : "dinhan33316@gmail.com"
+        name: custName,
+        phone: custPhone,
+        email: custEmail
       },
       paymentMethod: "momo",
       bookingCode: "CGO-" + Math.floor(100000 + Math.random() * 900000)
     };
 
     updateBookingUI();
-    bookingModal.classList.add("active");
+    modal.classList.add("active");
     document.body.classList.add("modal-open");
-  };
+  }
+  window.openBookingModal = openBookingModal;
 
   function closeBookingModal() {
-    if (!bookingModal) return;
-    bookingModal.classList.remove("active");
+    const modal = getBookingModal();
+    if (!modal) return;
+    modal.classList.remove("active");
     document.body.classList.remove("modal-open");
   }
+  window.closeBookingModal = closeBookingModal;
 
-  if (bookingCloseBtn) bookingCloseBtn.addEventListener("click", closeBookingModal);
-  if (bookingModal) {
-    bookingModal.addEventListener("click", (e) => {
-      if (e.target === bookingModal) closeBookingModal();
+  const initialCloseBtn = getBookingCloseBtn();
+  if (initialCloseBtn) initialCloseBtn.addEventListener("click", closeBookingModal);
+  const initialModalEl = getBookingModal();
+  if (initialModalEl) {
+    initialModalEl.addEventListener("click", (e) => {
+      if (e.target === initialModalEl) closeBookingModal();
     });
   }
 
@@ -1573,10 +1633,18 @@ function initCinegoApp() {
   }
 
   function updateBookingUI() {
-    const step = AppState.booking.step;
+    const step = AppState.booking ? AppState.booking.step : 1;
 
-    Object.keys(stepContainers).forEach(k => {
-      const container = stepContainers[k];
+    const currentStepContainers = {
+      1: document.getElementById("booking-step-1"),
+      2: document.getElementById("booking-step-2"),
+      3: document.getElementById("booking-step-3"),
+      4: document.getElementById("booking-step-4"),
+      5: document.getElementById("booking-step-5")
+    };
+
+    Object.keys(currentStepContainers).forEach(k => {
+      const container = currentStepContainers[k];
       if (!container) return;
       if (parseInt(k, 10) === step) {
         container.classList.remove("hidden");
@@ -1585,7 +1653,8 @@ function initCinegoApp() {
       }
     });
 
-    stepIndicators.forEach((pill, idx) => {
+    const pills = document.querySelectorAll(".booking-step-pill");
+    pills.forEach((pill, idx) => {
       const pillStep = idx + 1;
       if (pillStep === step) {
         pill.className = "booking-step-pill flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-cine-red text-white shadow-md shadow-red-600/30";
@@ -1596,14 +1665,20 @@ function initCinegoApp() {
       }
     });
 
-    if (step === 1) renderBookingStep1();
-    if (step === 2) renderBookingStep2();
-    if (step === 3) renderBookingStep3();
-    if (step === 4) renderBookingStep4();
-    if (step === 5) renderBookingStep5();
+    try {
+      if (step === 1) renderBookingStep1();
+      else if (step === 2) renderBookingStep2();
+      else if (step === 3) renderBookingStep3();
+      else if (step === 4) renderBookingStep4();
+      else if (step === 5) renderBookingStep5();
+    } catch (e) {
+      console.error("[Cinego Booking Step Render Error]:", e);
+    }
   }
 
   function renderBookingStep1() {
+    if (!AppState.booking || !AppState.booking.movie) return;
+
     const movieSelect = document.getElementById("bstep1-movie");
     const cinemaSelect = document.getElementById("bstep1-cinema");
     const datesContainer = document.getElementById("bstep1-dates");
@@ -1612,34 +1687,55 @@ function initCinegoApp() {
     const movieTitle = document.getElementById("bstep1-title");
     const movieMeta = document.getElementById("bstep1-meta");
 
-    if (movieSelect) {
+    const currentMovie = AppState.booking.movie;
+    const currentCinema = AppState.booking.cinema || (CINEGO_DATA.cinemas && CINEGO_DATA.cinemas[0]);
+
+    if (movieSelect && Array.isArray(CINEGO_DATA.nowShowing)) {
       movieSelect.innerHTML = CINEGO_DATA.nowShowing.map(m =>
-        `<option value="${m.id}" ${m.id === AppState.booking.movie.id ? "selected" : ""}>${m.title} (${m.ageRating})</option>`
+        `<option value="${m.id}" ${m.id === currentMovie.id ? "selected" : ""}>${m.title} (${m.ageRating || m.age_limit || 'P'})</option>`
       ).join("");
 
       movieSelect.onchange = (e) => {
-        AppState.booking.movie = CINEGO_DATA.nowShowing.find(m => m.id === e.target.value);
-        renderBookingStep1();
+        const found = CINEGO_DATA.nowShowing.find(m => m.id === e.target.value);
+        if (found) {
+          AppState.booking.movie = found;
+          renderBookingStep1();
+        }
       };
     }
 
-    if (cinemaSelect) {
+    if (cinemaSelect && Array.isArray(CINEGO_DATA.cinemas)) {
+      const currentCinemaId = currentCinema ? currentCinema.id : "";
       cinemaSelect.innerHTML = CINEGO_DATA.cinemas.map(c =>
-        `<option value="${c.id}" ${c.id === AppState.booking.cinema.id ? "selected" : ""}>${c.name} - ${c.city}</option>`
+        `<option value="${c.id}" ${c.id === currentCinemaId ? "selected" : ""}>${c.name} - ${c.city}</option>`
       ).join("");
 
       cinemaSelect.onchange = (e) => {
-        AppState.booking.cinema = CINEGO_DATA.cinemas.find(c => c.id === e.target.value);
-        renderBookingStep1();
+        const found = CINEGO_DATA.cinemas.find(c => c.id === e.target.value);
+        if (found) {
+          AppState.booking.cinema = found;
+          renderBookingStep1();
+        }
       };
     }
 
-    if (moviePoster) moviePoster.src = AppState.booking.movie.poster;
-    if (movieTitle) movieTitle.innerText = AppState.booking.movie.title;
-    if (movieMeta) movieMeta.innerText = `${AppState.booking.movie.genres.join(", ")} • ${AppState.booking.movie.duration} • Điểm ${AppState.booking.movie.rating}/10`;
+    if (moviePoster) moviePoster.src = currentMovie.poster || currentMovie.movie_poster || "";
+    if (movieTitle) movieTitle.innerText = currentMovie.title || "";
+    if (movieMeta) {
+      const genresList = Array.isArray(currentMovie.genres)
+        ? currentMovie.genres
+        : (currentMovie.genres ? [currentMovie.genres] : (currentMovie.genre ? currentMovie.genre.split(",") : ["Hành động"]));
+      const duration = currentMovie.duration || "120 phút";
+      const rating = currentMovie.rating ? `${currentMovie.rating}` : "9.0";
+      movieMeta.innerText = `${genresList.map(g => g.trim()).join(", ")} • ${duration} • Điểm ${rating}/10`;
+    }
 
-    if (datesContainer) {
-      datesContainer.innerHTML = dateOptions.map((d, idx) => {
+    const availableDates = (Array.isArray(dateOptions) && dateOptions.length > 0)
+      ? dateOptions
+      : (window.dateOptions || []);
+
+    if (datesContainer && availableDates.length > 0) {
+      datesContainer.innerHTML = availableDates.map((d, idx) => {
         const isSelected = d.value === AppState.booking.date;
         return `
           <button
@@ -1663,9 +1759,11 @@ function initCinegoApp() {
       });
     }
 
-    if (showtimesContainer) {
+    if (showtimesContainer && Array.isArray(CINEGO_DATA.showtimes)) {
       showtimesContainer.innerHTML = CINEGO_DATA.showtimes.map((st, idx) => {
         const isSelected = AppState.booking.showtime && AppState.booking.showtime.time === st.time;
+        const formatText = st.format || "2D";
+        const isImax = formatText.includes("IMAX");
         return `
           <button
             type="button"
@@ -1677,10 +1775,10 @@ function initCinegoApp() {
             data-index="${idx}">
             <div class="flex items-center justify-between mb-1">
               <span class="text-base font-extrabold text-white">${st.time}</span>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded ${st.format.includes('IMAX') ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-zinc-700 text-zinc-300'}">${st.format}</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isImax ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-zinc-700 text-zinc-300'}">${formatText}</span>
             </div>
             <div class="text-[11px] text-zinc-400">${st.room}</div>
-            <div class="text-xs font-bold text-cine-red mt-2">${st.price.toLocaleString("vi-VN")} đ</div>
+            <div class="text-xs font-bold text-cine-red mt-2">${(st.price || 95000).toLocaleString("vi-VN")} đ</div>
           </button>
         `;
       }).join("");
@@ -1688,8 +1786,10 @@ function initCinegoApp() {
       showtimesContainer.querySelectorAll(".bstep1-time-btn").forEach(btn => {
         btn.onclick = () => {
           const idx = parseInt(btn.getAttribute("data-index"), 10);
-          AppState.booking.showtime = CINEGO_DATA.showtimes[idx];
-          renderBookingStep1();
+          if (CINEGO_DATA.showtimes[idx]) {
+            AppState.booking.showtime = CINEGO_DATA.showtimes[idx];
+            renderBookingStep1();
+          }
         };
       });
     }
@@ -1709,15 +1809,19 @@ function initCinegoApp() {
   }
 
   function fetchOccupiedSeats(callback) {
-    if (!AppState.booking.movie) {
+    if (!AppState.booking || !AppState.booking.movie) {
       if (callback) callback();
       return;
     }
     const movieTitle = AppState.booking.movie.title;
     const showtime = AppState.booking.showtime ? `${AppState.booking.showtime.time} • ${AppState.booking.date}` : "";
+    const apiUrl = (window.CINEGO_ROUTES && window.CINEGO_ROUTES.api) ? window.CINEGO_ROUTES.api : "/api";
 
-    fetch(`${window.CINEGO_ROUTES.api}?action=get_occupied_seats&movie=${encodeURIComponent(movieTitle)}&showtime=${encodeURIComponent(showtime)}`, {
-      headers: { "X-CSRF-TOKEN": csrfToken }
+    fetch(`${apiUrl}?action=get_occupied_seats&movie=${encodeURIComponent(movieTitle)}&showtime=${encodeURIComponent(showtime)}`, {
+      headers: {
+        "Accept": "application/json",
+        "X-CSRF-TOKEN": csrfToken || window.CINEGO_CSRF_TOKEN || ""
+      }
     })
       .then(res => res.json())
       .then(data => {
@@ -2112,11 +2216,14 @@ function initCinegoApp() {
       paymentMethod: paymentNames[bookingData.paymentMethod] || "Ví điện tử"
     };
 
-    fetch(window.CINEGO_ROUTES.ticket, {
+    const ticketRoute = (window.CINEGO_ROUTES && window.CINEGO_ROUTES.ticket) ? window.CINEGO_ROUTES.ticket : "/send-ticket";
+
+    fetch(ticketRoute, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-CSRF-TOKEN": csrfToken
+        "Accept": "application/json",
+        "X-CSRF-TOKEN": csrfToken || window.CINEGO_CSRF_TOKEN || ""
       },
       body: JSON.stringify(payload)
     })
@@ -2440,11 +2547,13 @@ function initCinegoApp() {
     });
 
     try {
-      const response = await fetch(window.CINEGO_ROUTES.chat, {
+      const chatRoute = (window.CINEGO_ROUTES && window.CINEGO_ROUTES.chat) ? window.CINEGO_ROUTES.chat : "/chat-ai";
+      const response = await fetch(chatRoute, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRF-TOKEN": csrfToken
+          "Accept": "application/json",
+          "X-CSRF-TOKEN": csrfToken || window.CINEGO_CSRF_TOKEN || ""
         },
         body: JSON.stringify({
           message: text,
@@ -2647,8 +2756,13 @@ function initCinegoApp() {
       </div>
     `;
 
-    fetch(`${window.CINEGO_ROUTES.api}?action=lookup_tickets&keyword=${encodeURIComponent(keyword)}`, {
-      headers: { "X-CSRF-TOKEN": csrfToken }
+    const apiUrl = (window.CINEGO_ROUTES && window.CINEGO_ROUTES.api) ? window.CINEGO_ROUTES.api : "/api";
+
+    fetch(`${apiUrl}?action=lookup_tickets&keyword=${encodeURIComponent(keyword)}`, {
+      headers: {
+        "Accept": "application/json",
+        "X-CSRF-TOKEN": csrfToken || window.CINEGO_CSRF_TOKEN || ""
+      }
     })
       .then(res => res.json())
       .then(data => {
@@ -2756,9 +2870,14 @@ function initCinegoApp() {
     formData.append("ticket_code", ticketCode);
     if (ticketId) formData.append("id", ticketId);
 
-    fetch(`${window.CINEGO_ROUTES.api}?action=cancel_ticket`, {
+    const apiUrl = (window.CINEGO_ROUTES && window.CINEGO_ROUTES.api) ? window.CINEGO_ROUTES.api : "/api";
+
+    fetch(`${apiUrl}?action=cancel_ticket`, {
       method: "POST",
-      headers: { "X-CSRF-TOKEN": csrfToken },
+      headers: {
+        "Accept": "application/json",
+        "X-CSRF-TOKEN": csrfToken || window.CINEGO_CSRF_TOKEN || ""
+      },
       body: formData
     })
     .then(res => res.json())

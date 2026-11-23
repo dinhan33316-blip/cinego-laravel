@@ -787,7 +787,7 @@
           <span class="booking-step-pill">5. Vé điện tử</span>
         </div>
 
-        <button id="booking-close-btn" class="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors">
+        <button id="booking-close-btn" type="button" onclick="window.closeBookingModal ? window.closeBookingModal() : null" class="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
@@ -1745,21 +1745,21 @@
   <script src="{{ asset('assets/js/data.js') }}"></script>
   <script>
     window.CINEGO_ROUTES = {
-      api: <?php echo json_encode(route('cinego.api')); ?>,
-      chat: <?php echo json_encode(route('cinego.chat')); ?>,
-      ticket: <?php echo json_encode(route('cinego.tickets.store')); ?>
+      api: @json(route('cinego.api')),
+      chat: @json(route('cinego.chat')),
+      ticket: @json(route('cinego.tickets.store'))
     };
     window.CINEGO_CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || "{{ csrf_token() }}";
     window.CINEGO_COOKIES = {
-      name: <?php echo json_encode($cookieCustName, JSON_UNESCAPED_UNICODE); ?>,
-      phone: <?php echo json_encode($cookieCustPhone, JSON_UNESCAPED_UNICODE); ?>,
-      email: <?php echo json_encode($cookieCustEmail, JSON_UNESCAPED_UNICODE); ?>
+      name: @json($cookieCustName),
+      phone: @json($cookieCustPhone),
+      email: @json($cookieCustEmail)
     };
 
     (function() {
       try {
-        const dbShowing = <?php echo json_encode($jsShowingMovies, JSON_UNESCAPED_UNICODE); ?>;
-        const dbUpcoming = <?php echo json_encode($jsUpcomingMovies, JSON_UNESCAPED_UNICODE); ?>;
+        const dbShowing = @json($jsShowingMovies);
+        const dbUpcoming = @json($jsUpcomingMovies);
 
         if (Array.isArray(dbShowing) && dbShowing.length > 0) {
           CINEGO_DATA.nowShowing = dbShowing;
@@ -1853,7 +1853,10 @@
       `;
 
       fetch(`${window.CINEGO_ROUTES.api}?action=lookup_tickets&keyword=${encodeURIComponent(keyword)}`, {
-        headers: { "X-CSRF-TOKEN": window.CINEGO_CSRF_TOKEN }
+        headers: {
+          "Accept": "application/json",
+          "X-CSRF-TOKEN": window.CINEGO_CSRF_TOKEN || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ""
+        }
       })
         .then(res => res.json())
         .then(data => {
@@ -1958,7 +1961,10 @@
 
       fetch(`${window.CINEGO_ROUTES.api}?action=cancel_ticket`, {
         method: "POST",
-        headers: { "X-CSRF-TOKEN": window.CINEGO_CSRF_TOKEN },
+        headers: {
+          "Accept": "application/json",
+          "X-CSRF-TOKEN": window.CINEGO_CSRF_TOKEN || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ""
+        },
         body: formData
       })
       .then(res => res.json())
